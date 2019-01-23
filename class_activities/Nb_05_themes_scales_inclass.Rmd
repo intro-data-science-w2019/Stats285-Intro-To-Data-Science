@@ -1,0 +1,224 @@
+---
+title: "Changing themes and scales"
+author: "Math 285, Adam Loy"
+date: "Day 05"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+Today in class we'll explore how to change the theme (i.e. non-data ink) in your ggplot2 graphics. Along the way, we'll also see how to set aesthetic parameters and work with a few scales.
+
+
+## Example 1: Calories in Food
+
+Last class, we saw a hideous bar chart displaying the number of calories in five foods. Our first task is to create a polished version of this plot.
+
+
+### (a) Create a bar chart displaying the calories by food, coloring the bars by `bacon`.
+
+The data shown last class are created in the below code chunk.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+calories <- tribble(
+  ~food, ~calories, ~bacon,
+  "French Fries", 607, FALSE,
+  "Potato chips", 542, FALSE,
+  "Bacon", 533, TRUE,
+  "Pizza", 296, FALSE,
+  "Chili Dog", 260, FALSE
+)
+```
+
+```{r 1a solution}
+ggplot(data = calories, aes(x=food, y = calories, fill=bacon)) + geom_col() + labs(x= "Food Type", y = "Calories", title = "Callories by Food", subtitle = "Color Shows Whether Bacon or Not")
+
+ggplot(data = calories, aes(x=food, y = calories, fill=bacon)) + geom_bar(stat = "identity") + labs(x= "Food Type", y = "Calories", title = "Callories by Food", subtitle = "Color Shows Whether Bacon or Not")
+```
+
+### (b) Reorder the bars by caloric content.
+
+We can use the `fct_inorder()` command to reorder the bars within our ggplot2 code since the rows are ordered. 
+
+```{r 1b solution}
+base <- ggplot(data = calories, aes(x=fct_inorder(food), y = calories, fill=bacon)) + geom_col() + labs(x= "Food Type", y = "Calories", title = "Calories by Food", subtitle = "Color Shows Whether Bacon or Not", caption = "Ordered by Calories")
+base
+```
+
+Other helpful functions for reordering factors for plotting include `fct_reorder()`, `fct_infreq()`, and `fct_rev()`. These functions are part of the `forcats` package which is loaded by the `tidyverse`.
+
+
+### (c) Remove the axis labels, since they are redundant.
+
+One approach is to set their `labs()` to `NULL`:
+
+```{r 1c solution}
+ggplot(data = calories, aes(x=fct_inorder(food), y = calories, fill=bacon)) + geom_col() + labs(NULL)
+```
+
+Another approach is to set the appropriate element of the `theme()` to `element_blank()`:
+
+```{r 1c solution2}
+base + 
+  theme(axis.title = element_blank())
+base <- base + theme(axis.title = element_blank())
+```
+
+
+
+### (d) Remove the legend, since we are simply calling attention to bacon.
+
+We can edit the appearance of the legend using a variety of arguments within the `theme()` (see `?theme` for the full list). To remove the legend, we set `legend.position = "none"` (Other options for the  position include`"left"`, `"right"`, `"bottom"`, `"top"`, or a two-element numeric vector)
+
+```{r 1d solution}
+base + 
+  theme(legend.position = "none")
+base <- base + theme(legend.position = "none")
+```
+
+### (e) Change the scale for fill color.
+
+The default fill colors are not ideal, especially since we are simply drawing attention to bacon. To change the scale, we appeal to a `scale_fill_<method>()` function. A few options include:
+
+- `scale_fill_brewer()`
+- `scale_fill_grey()`
+- `scale_fill_viridis_c()`
+- `scale_fill_manual()`
+
+We'll use the last option today. 
+
+With `scale_fill_manual()`, you can manually specify named colors for a factor in the order of the levels:
+
+```{r e solution1}
+base + 
+  scale_fill_manual(values = c("gray40", "red2"))
+base <- 
+# Change the fill colors to "gray40" and "red2"
+```
+
+You can also use other formats, like RGB
+
+```{r e solution2}
+# Change the fill colors to (R: 163, G: 163, B: 163) and (R: 192, G: 66, B: 68)
+base + 
+  scale_fill_manual(values = c(
+    rgb(163, 163, 163, maxColorValue = 255), 
+    rgb(192, 66, 68, maxColorValue = 255)
+    ))
+```
+
+or hex codes
+
+```{r e solution3}
+# Change the fill colors to "#DFDCE3" and "#FC4A1A"
+base + 
+  scale_fill_manual(values = c("#DFDCE3", "#FC4A1A"))
+base <- base + scale_fill_manual(values = c("#DFDCE3", "#FC4A1A"))
+```
+
+### (f) Remove the gray background.
+
+The background adds a lot of non-data ink, so many people prefer to remove it. Remember that to remove an element of a theme, we set it to `element_blank()`.
+
+```{r f solution}
+# Remove the grid's background color
+base + 
+  theme(panel.background = element_blank())
+base <- base + theme(panel.background = element_blank())
+```
+
+### (g) Remove tick marks on the axes.
+
+
+```{r g solution}
+# Remove the axis tick marks
+base + 
+  theme(axis.ticks = element_blank())
+base <- base + theme(axis.ticks = element_blank())
+```
+
+
+## (h) Add guidelines (Tufte style)
+
+Edward Tufte didn't like grids on plots, but he acknowledged that they helped interpret plots. For bar charts, he made a compromise, adding the grid only to the bars. In ggplot2, this is accomplished by adding white horizontal lines via `geom_hline()`.
+
+```{r h solution}
+# Add white horizontal lines at the labeled values on the y-axis
+base + 
+  geom_hline(yintercept = c(200, 400, 600), 
+                  color = "white", 
+                  lwd = 1)
+```
+
+## (i) Direct labels: remove y-axis text and annotate the bars
+
+An alternative is to directly label the bars. We can achieve this by adding a layer via `geom_text()`. Notice that we only needed to specify the `label` here because the other aesthetic mappings are _inherited_ from the base layer.
+
+```{r i solution}
+# Add text to directly label the bars
+base + 
+  geom_text(
+    aes(label = calories),
+    vjust = -0.3,
+    color = "black"
+  ) +
+  theme(axis.text.y = element_blank()) 
+```
+
+
+
+## Example 2: Polishing the Economist graphic
+
+On Friday, you tried to recreate a graphic exploring the average net cost of US colleges by income quintile. Below is my version on this graphic based on the tools we had on Friday. 
+
+```{r ex2 template}
+scorecard <- read_csv("https://github.com/cmsc205/data/raw/master/ScorecardSmallNarrow.csv")
+
+econ <- ggplot(scorecard, aes(x = ADM_RATE*100, y = net_cost/1000)) +
+  geom_point(alpha = 0.2, color='steelblue2') +
+  geom_smooth(se = FALSE, color = 'black') +
+  facet_grid(fct_rev(CONTROL) ~ income_group) +
+  labs(x = "Admissions rate, %", y = "Net cost per year, $`000",
+       title = "Scorecard",
+       subtitle = "Average net cost per year at U.S. colleges",
+       caption = "*Colleges with at least 1,000 undergrads")
+econ
+
+```
+
+
+Use what you have learned about themes to polish this plot to more-closely resemble the plot from *The Economist*. Feel free to explore the `ggthemes` package and the help file for `theme()`.
+
+```{r ex2 solution}
+# Keep editing the above plot in an effort to maatch the Economist's theme
+ggplot(data = scorecard) +
+  geom_point(aes(x = ADM_RATE*100, y = net_cost/1000), alpha = 0.2, color='deepskyblue3') +
+  facet_grid(CONTROL~income_group, as.table = FALSE) +
+  geom_smooth(aes(x = ADM_RATE*100, y = net_cost/1000), se = FALSE, color = 'black') +
+  labs(
+    title = "Scorecard",
+    subtitle = "Average net cost per year at US colleges, by income quintile",
+    x = "Admissions rate, %",
+    y = "Net cost per year, $1000",
+    caption = "*Colleges with at least 1,000 undergrads"
+  )
+```
+```{r}
+econ +
+  theme(
+    plot.background = element_rect(fill = "gray93"),
+    panel.background = element_rect(fill = "white"),
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(linetype = 3, color = "gray50"),
+    axis.line.x = element_line(),
+    strip.background = element_rect(fill = "gray75") +
+    scale_y_continuous(breaks = seq(0,50,by=10)  ))
+```
+

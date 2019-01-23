@@ -1,0 +1,39 @@
+---
+title: "Class exercises day 3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+library(tidyverse)
+?mpg
+
+ggplot(data = mpg, aes(x=class, fill = class)) + geom_bar()
+```
+
+```{r cars}
+library(tidyverse)
+?mpg
+
+base<-ggplot(data = mpg, aes(x=displ, y= hwy, color = class)) + geom_point()
+base + facet_wrap(~class, nrow = 2)
+base + facet_grid(drv~cyl)
+
+ggplot(data=mpg) + geom_point(mapping = aes(x= displ, y= hwy) pasition="jitter") + geom_smooth(mapping = aes(x=                                                                                 displ, y = hwy))
+
+=
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

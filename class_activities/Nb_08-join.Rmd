@@ -1,0 +1,47 @@
+---
+title: "Combining multiple data tables"
+author: "Math 285, Adam Loy"
+date: "Day 08"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+
+## Your turn: Space launches
+
+The **agencies** and **launches** data sets can be loaded using the below code chunk, and you can find the code books in [this Tidy Tuesday GitHub Repository](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-01-15).
+
+```{r message=FALSE}
+agencies <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-15/agencies.csv")
+launches <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-15/launches.csv")
+```
+
+
+### Task 1
+
+Use an appropriate join statement to merge the agencies and launches data tables such that all rows from the launches data table are retained.
+```{r}
+left_join(x= launches, y = agencies, by = "state_code")
+```
+
+
+
+
+### Task 2
+
+Calculate the number of SpaceX launches by year.
+```{r}
+left_join(x= launches, y = agencies, by = "state_code")
+```
+
+
+
+### Task 3
+
+Create a time series plot of the number of SpaceX launches by year.
+

@@ -1,0 +1,255 @@
+---
+title: "Introduction to Data Wrangling with dplyr"
+author: "Math 285, Adam Loy"
+date: "Day 07"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(babynames)
+```
+
+This .Rmd file contains the "Your turn" question text. Please complete these questions as we work through these concepts in class.
+
+## babynames
+
+```{r}
+babynames
+```
+
+
+## select()
+
+Which of these is NOT a way to select the `name` and `n` columns together?
+select(babynames, ends_with("n"))"
+```{r}
+select(babynames, -c(year, sex, prop))
+select(babynames, name:n)
+select(babynames, starts_with("n"))
+select(babynames, ends_with("n"))
+```
+
+## filter()
+
+Use `filter()` with the logical operators to extract:
+
+1. All of the names where `prop` is greater than or equal to 0.08
+
+2. All of the babies named "Sea"
+
+3. All of the names that have a missing value for `n`
+
+
+```{r}
+#1
+babynames %>% filter(prop >= 0.08)
+#2
+babynames %>% filter(name == "Sea")
+#3
+filter(babynames, is.na(n))
+
+babynames %>% filter(name =="Noam")
+```
+
+
+
+## filter() with Boolean operators
+
+Use Boolean operators to alter the code below to return only the rows that contain:
+
+- Girls named Sea
+
+- Names that were used by exactly 5 or 6 children in 1880
+
+- Names that are one of Acura, Lexus, or Yugo
+
+```{r}
+filter(babynames, name == "Sea" | name == "Anemone")
+babynames %>%  filter(name == "Sea", sex = "F") 
+
+babynames %>% filter (n == "5" | n == "6") 
+filter(babynames, year == 1880 & (n==5 | n==6))
+
+babynames %>% filter(name == "Acura" | name == "Lexus" | name == "Yugo")
+filter(babynames, name %in% c("Acura", "Lexus", "Yugo"))
+```
+
+
+
+## arrange()
+
+- Arrange babynames by `n`. 
+
+- Add `prop` as a second (tie breaking) variable to arrange by.
+
+- Can you tell what the smallest value of `n` is?
+
+```{r}
+arrange(babynames, n)
+arrange(babynames, n, prop)
+arrange(babynames, desc(n))
+```
+
+
+
+## Descending order
+
+- Use `desc()` to find the names with the highest `prop`
+
+- Then, use `desc()` to find the names with the highest `n`.
+
+```{r}
+arrange(babynames, desc(n))
+arrange(babynames, desc(prop))
+```
+
+
+
+## filter() + select() + arrange()
+
+1. Filter `babynames` to just girls born in 2015
+
+2. Select the `name` and `n` columns from the result
+
+3. Arrange those columns so that the most popular names appear near
+the top.
+
+```{r}
+babynames %>% filter(sex == "F", year == "2015") %>% select(name, n) %>% arrange(desc(n))
+```
+
+
+
+## Putting it all together
+
+1. Trim `babynames` to just the rows that contain your name
+and your sex
+
+2. Trim the result to just the columns that will appear in
+your graph (not strictly necessary, but useful practice)
+
+3. Plot the results as a line graph with `year` on the x axis and `prop` on the y axis
+
+4. Add an informative title and polish the axis labels
+
+```{r}
+babynames %>% 
+  filter(name == "Noam", sex == "M") %>% 
+  ggplot(aes(x = year, y = prop)) + 
+  geom_line() + 
+  labs(x = "Year",
+       y = "Proportion of Kids Named Noam",
+       title = "Proportion of Children Born Named Noam Between 1880 and 2017")
+```
+
+
+
+## summarize()
+
+Use `summarize()` to compute three statistics about the data:
+
+1. The first (minimum) year in the dataset
+
+2. The last (maximum) year in the dataset
+
+3. The total number of children represented in the data
+
+```{r}
+summarize(babynames,
+          min = min(year), 
+          max = max(year), 
+          sum = sum(n))
+
+
+```
+
+
+
+## summarize() 2
+
+
+Extract the rows where `name == "Khaleesi"`. Then use `summarize()` and a summary functions to find:
+
+1. The total number of children named Khaleesi 
+
+2. The first year Khaleesi appeared in the data
+
+```{r}
+babynames %>% 
+  filter(name == "Khaleesi") %>% 
+  summarize(Khaleesis = sum(n))
+```
+
+
+
+## Grouped summaries
+
+- Use `group_by()`, `summarize()`, and `arrange()` to display the ten most popular names of all time
+
+- Compute popularity as the total number of children of a single sex given a name
+
+```{r}
+babynames %>% 
+  group_by(name) %>%
+  summarize(nName = sum(n)) %>%
+  arrange(desc(nName)) %>%
+  head(n = 10)
+```
+
+
+
+## Ranking baby names
+
+Use `min_rank()` and `mutate()` to rank each row in `babynames` from largest `prop` to smallest `prop`.
+
+```{r}
+
+babynames %>% 
+  mutate(rank = min_rank(desc(prop))) %>%
+  arrange(rank)
+
+#to fully embrace the pipe operator
+babynames %>%
+  mutate (ranking = prop 
+          %>% desc() 
+          %>% min_rank()) %>%
+  
+```
+
+
+## Grouped rankings
+
+- Compute each name's rank *within its year and sex*.
+
+- Then compute the median rank for *each combination of name and sex*, and arrange the results from highest median rank to lowest.
+
+```{r}
+babynames %>% 
+  group_by(year, sex) %>%
+  mutate(rank = min_rank(desc(prop))) %>%
+  arrange(rank, year)
+
+
+babynames %>% 
+  group_by(year, sex) %>%
+  mutate(rank = min_rank(desc(prop))) %>%
+  group_by(name, sex) %>%
+  mutate(median = median(rank)) %>%
+  arrange(median)
+
+#embracing pipe operator
+babynames %>% 
+  group_by(year, sex) %>%
+  mutate(rank = prop %>%
+           desc() %>%
+           min_rank()) %>%
+  group_by(name, sex) %>%
+  mutate(median = rank %>%
+           median()) %>%
+  arrange(median)
+
+```
+

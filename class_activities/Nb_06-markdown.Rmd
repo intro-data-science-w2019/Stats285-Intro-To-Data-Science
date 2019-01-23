@@ -1,0 +1,90 @@
+---
+title: "Chunk and output options in R Markdown"
+author: "Math 285, Adam Loy"
+date: "Day 06"
+output: github_document
+---
+
+**Disclaimer** This .Rmd lacks the usual global chunk options that most/all of my .Rmd files have. This was done to allow you to explore how these options work when compared to the default settings. Since we are exploring R chunk options, to get the most out of this activity you should view the .Rmd file and see the output produced. Just viewing the .md is not all that useful! 
+
+## Chunk output options
+Below, we read in the German credit data and show the breakdown of good/bad loans but don't show the commands:
+```{r creditdata, echo = FALSE}
+loans <- read.csv("http://math.carleton.edu/kstclair/data/CreditData.csv")
+table(loans$Good.Loan)
+```
+
+Here, we show the commands that use the `hw0` version of the data, but you don't actually evalate (i.e. run) the commands: 
+```{r day1creditdata, eval = FALSE}
+loans <- read.csv("http://math.carleton.edu/kstclair/data/day1CreditData.csv")
+table(loans$Good.Loan)
+```
+
+The next command we run does actually evaluate the code. Notice that `loans` is still the full 1000 case dataset, not the 700-case day 1 data. **Why?**
+```{r}
+table(loans$Good.Loan)
+```
+Note: The default chunk options both show code and output.
+
+Notice that the first two chunks are named. We can rerun code in a named chunk just by creating a chunk with the same name but **no** code included. **What happens if we reuse the second chunk, named `day1creditdata`, but this time evaluate the code?**
+```{r day1creditdata, eval = TRUE}
+```
+Notice that we **did not** need to repeat the code in the `day1creditdata` chunk!
+
+Let's return the dataset `loans` to contain full credit dataset. We can reuse the first code chunk but not include any output:
+```{r creditdata, include = FALSE}
+```
+
+**What chunk options would you set so you only show a boxplot but not the code used to create it?**
+
+## 2. Chunk formatting
+The default output style for R chunks highlights code in gray (without `>` prompts), denotes output with two hashtags `##` and 
+```{r stats}
+summary(loans$Duration.in.month)
+tapply(loans$Duration.in.month, loans$Good.Loan, summary)
+```
+
+Here we can supress the output hashtags by adding `comment=NULL`:
+```{r stats, comment = NULL}
+```
+**What happens if you set `comment=":)"`?**
+
+Here we collapse all commands and output from the below chunk into one gray command/output field by adding `collapse=TRUE`:
+```{r stats, comment = NULL, prompt = TRUE, collapse = TRUE}
+```
+
+## 3. Inline R code
+You can use *inline R code chunks* to place numerical output in your text. The full German credit dataset contains `r nrow(loans)` cases. The average loan duration of these cases is `r mean(loans$Duration.in.month)` months.
+
+You can use the `round()` command to get a sensible number of digits (duration is integer valued). The average loan duration of these cases is `r round(mean(loans$Duration.in.month), 1)` months. **Use inline R coding to get the duration standard deviation reported to 1 decimal spot.**
+
+For really big numbers you can use `format()` to add commas. The maximum credit amount in the data is  $`r format(max(loans$Credit.amount), big.mark = ",")`. 
+
+
+## 4. Supressing messages
+We often load libraries that have annoying messages:
+```{r annoying, error = TRUE}
+library(tidyverse)
+```
+Check this chunk in your knitted document. You may have an error message in your knitted document (and in your console if you run it there) that tells you to install the package `tidyverse`. If so, install the package and reknit your document! Once `tidyverse` is installed, you will then get  annoying package message information when loading this library. To supress this message include the option `message = FALSE`.
+
+
+## 5. Debugging code
+If you did not have `tidyverse` installed on your computer, then running the `library(tidyverse)` command in part 4 would normally cause a "fatal" compilation error that keeps your file from knitting. You then get to frantically search your .Rmd file for the location of your error. Adding the option `error = TRUE` allows your document to knit and shows you the error in the knitted output. Here is an example with `error = TRUE`:
+```{r, error = TRUE}
+x<- 1:5
+(x-1)(x+1)
+```
+**What is the error in this code?? What happens if you set `error = FALSE`? (Try it and see!)**
+
+One option for debugging a .Rmd file that has R code errors is to set `knitr::opts_chunk$set(error = TRUE)` as a global option at the start of the document. I usually don't start out my Markdown files with `error = TRUE` because it can be too easy to overlook an error in your code this way. 
+
+You will generally encounter two types of errors in R Markdown documents. If your document knits after setting `error = TRUE`, then there is an issue with your R code. If the document still does not knit after adding this option, then you have an error in formatting that is not related to your R code. If you have a typo in your chunk options, then you will still get a reference to a line location. Other errors can involve mistakes in your header. 
+
+**Change your output header type to `guthub_document` to see a non-R chunk type of error message.**
+
+* * *
+
+### Acknowledgements
+
+This activity was developed for Math 285 by Katie St. Clair.

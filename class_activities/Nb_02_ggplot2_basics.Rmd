@@ -1,0 +1,242 @@
+---
+title: "Intro to `ggplot2`"
+author: "Math 285, Adam Loy"
+date: "Day 02"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse=TRUE, eval=TRUE, error=TRUE)
+```
+
+*To avoid merge conflicts, I recommend moving the activity files to a separate subdirectory within you math285 folder.*
+
+Today, we'll use an excerpt of the data available at gapminder.org to explore how the essential elements of the grammar of graphics can be used to build various graphics.
+
+## Data overview
+
+The 2018 Gapminder data set contains information on income (GDP adjusted for difference in purchasing power), life expectancy (the average number of years a newborn is expected to live if mortality patterns remain constant), and population for 193 countries in 2018. The data set can be loaded using the below code (ignore the message that's printed when you run the code for now):
+
+```{r}
+gapminder <- readr::read_csv("https://aloy.rbind.io/data/gapminder2018.csv")
+```
+
+
+**1.** To get started, load the `tidyverse` and take a `glimpse()` at the data set:
+
+```{r, message=FALSE}
+# Put your code here
+library(tidyverse)
+glimpse(gapminder)
+```
+
+Loading the `tidyverse` loads 8 packages, one of which is `ggplot2`. You can certainly load each package individually, but it has become common to simply load the `tidyverse`.
+
+## Scatterplot
+
+First, let's create a _scatterplot_ of `income` vs. `life_expectancy`. 
+
+_A note on wording:_ when we say `income` vs. `life_expectancy`, this should be interpreted as "variable on the y-axis" vs. "variable on the x-axis".
+
+```{r}
+gapminder %>% ggplot(aes(x= life_expectancy, y= income)) + geom_point()
+```
+
+
+**2.** Identify the components of the grammar of graphics listed below. The elements in bold _must_ be specified to make a `ggplot2` plot. (We'll ignore "coordinate system" and "faceting" after this, but we can't forget about them completely!)
+
+- **data**: `gapminder`
+- **aesthetic mapping**: x=life expectancy, y = income
+- **geometric object**:
+- scale:
+- statistical transformation:
+- faceting:
+
+**3.** Fill in the data and aesthetic mapping in the below code chunk. What is returned? What's missing?
+  Returns blank graph, missing the geometric object geom_point.
+```{r}
+# Fill in the blanks
+ggplot(data = gapminder, mapping = aes(x = life_expectancy, y = income))
+```
+
+
+**4.** Add the appropriate geometric object to create the scatterplot. This is called adding a _layer_ to a plot. Remember to always put the `+` at the end of a line, never at the start.
+
+```{r}
+# Copy your code from the previous chunk and add a geom
+ggplot(data = gapminder, mapping = aes(x = life_expectancy, y = income))+geom_point()
+
+```
+
+What do you see? Describe your findings.
+Graph with apparent exponential correlation between Income and Life Expectancy.
+
+**5.** You _must_ remember to put the aesthetic mappings in the `aes()` function! What happens if you forget? 
+It returns a blank frame.
+```{r}
+# Add a layer and see what happens
+ggplot(data = gapminder, x = life_expectancy, y = income)
+```
+
+
+**6.** The aesthetic mappings can be specified in the geom layer if you prefer, instead of the main `ggplot()` call. Give it a try:
+
+```{r}
+# Rebuild the scatterplot with your aesthetic mapping in the geom layer
+ggplot(data = gapminder) + geom_point( mapping = aes(x = life_expectancy, y = income))
+```
+
+
+## Exploring additional aesthetics
+
+As we discussed, `x` and `y` are not the only aesthetic mappings possible. In this section you'll explore the `color`, `size`, `shape`, and `alpha` (i.e. transparency) aesthetics.
+
+**7.** Create a scatterplot of `income` vs. `life_expectancy`. Add the `color` aesthetic to map `four_regions` to the point color.
+
+```{r}
+# Put your scatterplot code here 
+ggplot(data = gapminder, mapping = aes(x = life_expectancy, y = income, color = four_regions)) + geom_point()
+```
+
+What do you learn by adding color to the scatterplot?
+African countries generally appear to have lower income and life expectancy levels, Asia and Europe have wider ranges of income and life expectancy levels, and the amaricas are also well spread but with fewer extremes than the other countries. 
+
+
+**8.** Create a scatterplot of `income` vs. `life_expectancy`. Use `shape` to represent the `four_regions`. Is this plot easier or harder to interpret than the previous plot?
+
+```{r}
+# Put your scatterplot code here 
+ggplot(data = gapminder, mapping = aes(x = life_expectancy, y = income, shape = four_regions)) + geom_point()
+```
+This plot is much more difficult to understand than the previous plot.
+
+
+**9.** Create a scatterplot of `income` vs. `life_expectancy`. Use both `shape` and `color` to represent the `four_regions`. Is this plot easier or harder to interpret than the previous two plots?
+
+```{r}
+# Put your scatterplot code here 
+ggplot(data = gapminder, mapping = aes(x = life_expectancy, y = income, color = four_regions, shape=four_regions)) + geom_point()
+```
+This is about as easy to interpret as the color plot but much easier to interpret than the plot with only shapes.
+
+**10.** Create a scatterplot of `income` vs. `life_expectancy`. Use `color` to represent the `population`.
+
+```{r}
+# Put your scatterplot code here 
+ggplot(data = gapminder, mapping = aes(x = life_expectancy, y = income, color = population)) + geom_point()
+```
+
+**11.** Create a scatterplot of `income` vs. `life_expectancy`. Use `size` to represent the `population`.
+
+```{r}
+# Put your scatterplot code here 
+ggplot(data = gapminder, mapping = aes(x = life_expectancy, y = income, size = population)) + geom_point()
+```
+
+**12.** Look back at your scatterplots from questions 8-11. Explain the differences when you map aesthetics to discrete and continuous variables.
+
+
+**13.** Create a scatterplot of `income` vs. `life_expectancy`. Use `alpha` to represent the `population`.
+
+```{r}
+# Put your scatterplot code here 
+```
+
+So far we've focused on explore the relationship between two variables. Now, let's explore how to build univariate graphics in `ggplot2`.
+
+
+## Histograms, and Kernel Density Plots
+
+First, let's build a histogram of life expectancy.
+
+**14.** Identify the components of the grammar of graphics listed below. The elements in bold _must_ be specified to make a `ggplot2` plot.
+
+- **data**: `gapminder`
+- **aesthetic mapping**:
+- **geometric object**:
+- scale:
+- statistical transformation:
+- faceting:
+
+
+**15.** Build the histogram of life expectancy using `geom_histogram()`. Don't hesitate to look at the ggplot2 cheat sheet for help!
+
+```{r}
+# Put your histogram code here
+```
+
+What have you learned about the distribution of life expectancy in 2018?
+
+
+**16.** To change the number of bins, to say 50, add the *argument* `bins = 50` to `geom_histogram()`. Note: this is **not** an aesthetic mapping.
+
+```{r}
+# Put your histogram code here
+```
+
+**17.**  Instead of a histogram, let's create a kernel density plot. To do this, substitute `geom_density()` into your code for question 15.
+
+```{r}
+# Put your density plot code here
+```
+
+
+
+## Box plots, and violin plots
+
+Next, let's make _box plots_ of the population for each region (based on the `four_regions` column).
+
+**18.** Identify the components of the grammar of graphics listed below. The elements in bold _must_ be specified to make a `ggplot2` plot.
+
+- **data**: `gapminder`
+- **aesthetic mapping**:
+- **geometric object**:
+- scale:
+- statistical transformation:
+- faceting:
+
+**19.** Use `geom_boxplot()` to create _box plots_ of the population for each region. What do you learn?
+
+```{r}
+# Put your boxplot code here.
+```
+
+**20.** The boxplots in question 19 are hard to read due to the _scale_ of the y-axis. Add the layer `scale_y_log10()` to apply a logarithmic transformation to the y-axis. What do you learn?
+
+```{r}
+# Put your boxplot code here.
+```
+
+
+**21.** A violin plot is a kernel density on its side, made symmetric. Change your code from question 20 to use `geom_violin()`. Which plot do you prefer, boxplots or violin plots? Why?
+
+```{r}
+# Put your violin plot code here.
+```
+
+
+## Bar plots
+
+How many countries are in each region? Let's use graphics to find out!
+
+**22.**  Identify the components of the grammar of graphics listed below. The elements in bold _must_ be specified to make a `ggplot2` plot.
+
+- **data**: `gapminder`
+- **aesthetic mapping**:
+- **geometric object**:
+- scale:
+- statistical transformation:
+- faceting:
+
+**23.** Make a bar chart of the number of countries in each continent using `geom_bar()`. 
+
+```{r}
+# Put your bar chart code here.
+```
+
+
+**24.** Notice the y-axis. Oddly, `ggplot2` doesn't make it obvious how to change to proportion. Try adding a `y` aesthetic: `y = ..count../sum(..count..)`.
+
+```{r}
+# Put your new bar chart code here.
+```
