@@ -1,0 +1,18 @@
+This is a file containing the work I have done so far in Introduction To Data Science
+
+Folders:
+  data:
+     Data used in assignments (HW and Class)
+  class_activities:
+     My work on in class activities and assignments.
+  homework:
+     My completed homework assignments.
+     
+     
+homework Folder:
+  homework0-nbenkler:
+    A simple exercise to remind students of basic R principles such as exploring data, manipulating vectors, and applying functions to vectors.
+  homework1-nbenkler:
+    A slightly more complicated exercise targeted at refamiliarizing students with analyzing, interpreting, and creating figures. 
+  homework2-nbenkler:
+    A more complex exercise focused on understanding, manipulating, and improving data visualizations using ggplot2.
